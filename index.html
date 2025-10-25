@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>画像圧縮ツール</title>
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f6f6f6;
+      color: #333;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      margin: 20px auto;
+      display: block;
+    }
+    .progress {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #666;
+    }
+    .file-list {
+      margin-top: 30px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+    .file-item {
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>画像圧縮ツール（500KB以下）</h1>
+  <input type="file" id="fileInput" multiple accept="image/*" />
+  <div class="progress" id="progress">ファイルを選択してください。</div>
+  <div class="file-list" id="fileList"></div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const progress = document.getElementById("progress");
+    const fileList = document.getElementById("fileList");
+
+    fileInput.addEventListener("change", async (event) => {
+      const files = event.target.files;
+      if (!files.length) return;
+
+      progress.textContent = "圧縮を開始しています…";
+
+      for (const file of files) {
+        try {
+          const options = {
+            maxSizeMB: 0.5, // 500KB 以下を目指す
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          };
+
+          const compressedFile = await imageCompression(file, options);
+
+          // ファイル名設定：「元名_500kb.拡張子」
+          const fileNameParts = file.name.split(".");
+          const ext = fileNameParts.pop();
+          const baseName = fileNameParts.join(".");
+          const newFileName = `${baseName}_500kb.${ext}`;
+
+          // ダウンロードリンク作成
+          const downloadUrl = URL.createObjectURL(compressedFile);
+          const a = document.createElement("a");
+          a.href = downloadUrl;
+          a.download = newFileName;
+          a.click();
+          URL.revokeObjectURL(downloadUrl);
+
+          // 表示用ログ
+          const item = document.createElement("div");
+          item.className = "file-item";
+          item.innerHTML = `
+            <strong>${file.name}</strong><br>
+            元サイズ: ${(file.size / 1024).toFixed(1)} KB<br>
+            圧縮後: ${(compressedFile.size / 1024).toFixed(1)} KB<br>
+            <em>${newFileName}</em> としてダウンロードされました。
+          `;
+          fileList.appendChild(item);
+
+        } catch (error) {
+          console.error(error);
+          const item = document.createElement("div");
+          item.className = "file-item";
+          item.textContent = `${file.name} の圧縮に失敗しました。`;
+          fileList.appendChild(item);
+        }
+      }
+
+      progress.textContent = "すべての画像の処理が完了しました。";
+    });
+  </script>
+</body>
+</html>
