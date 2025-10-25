@@ -1,221 +1,146 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>画像圧縮新聞</title>
+  <meta charset="UTF-8">
+  <title>画像圧縮</title>
   <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
   <style>
     body {
-      font-family: 'Times New Roman', '游明朝', serif;
-      background-color: #f4f1ec;
+      font-family: "Times New Roman", "游明朝", serif;
+      background-color: #f8f8f8;
+      padding: 30px;
       color: #222;
-      padding: 40px;
-      max-width: 900px;
-      margin: 0 auto;
-      line-height: 1.5;
     }
 
     h1 {
       text-align: center;
-      font-size: 2rem;
+      font-size: 2.4em;
+      border-bottom: 2px solid #000;
+      margin-bottom: 15px;
       letter-spacing: 2px;
-      border-bottom: 2px solid #333;
-      display: inline-block;
-      padding-bottom: 5px;
+    }
+
+    .subheadline {
+      text-align: center;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .upload-area {
+      text-align: center;
       margin-bottom: 30px;
     }
 
     input[type="file"] {
-      display: block;
-      margin: 20px auto;
-      font-size: 0.9rem;
+      font-size: 0.9em;
+      padding: 5px;
     }
 
-    .progress {
+    .status {
       text-align: center;
-      font-size: 0.85rem;
-      margin-top: 10px;
-      color: #555;
+      margin: 20px 0;
+      font-size: 0.9em;
       font-style: italic;
     }
 
-    .file-list {
-      margin-top: 40px;
-      border-top: 1px solid #999;
+    .preview {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      border-top: 1px solid #ccc;
       padding-top: 20px;
     }
 
-    .file-item {
-      background: #fffdfa;
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
-      padding: 15px;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .file-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      margin-bottom: 10px;
-      border-bottom: 1px dashed #bbb;
-      padding-bottom: 5px;
-    }
-
-    .file-header strong {
-      font-size: 1rem;
-      font-weight: bold;
-    }
-
-    .file-body {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 15px;
-      margin-top: 10px;
-    }
-
-    .file-body img {
-      width: 150px;
-      height: auto;
+    .preview-item {
       border: 1px solid #ddd;
-    }
-
-    .preview-group {
+      padding: 10px;
+      background-color: #fff;
+      max-width: 250px;
+      font-size: 0.8em;
       text-align: center;
-      font-size: 0.75rem;
-      color: #444;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     }
 
-    .compression-rate {
-      display: inline-block;
-      background: #333;
-      color: #fff;
-      font-size: 0.75rem;
-      padding: 2px 6px;
-      border-radius: 3px;
+    .preview-item img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .file-info {
       margin-top: 5px;
     }
 
-    .size-info {
-      display: flex;
-      flex-direction: column;
-      font-size: 0.8rem;
-      color: #444;
-    }
-
-    .size-info span {
-      margin: 2px 0;
-    }
-
-    .download-info {
-      font-size: 0.75rem;
-      color: #555;
-      margin-top: 8px;
-      text-align: right;
-      font-style: italic;
-    }
-
-    .divider {
-      text-align: center;
-      color: #aaa;
-      margin: 30px 0;
-      font-size: 0.8rem;
+    .label {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>画像圧縮新聞</h1>
-  <input type="file" id="fileInput" multiple accept="image/*" />
-  <div class="progress" id="progress">今日の一面：ファイルを選択してください。</div>
-  <div class="file-list" id="fileList"></div>
+  <h1>画像圧縮</h1>
+  <p class="subheadline">ファイルを選択してください。</p>
+
+  <div class="upload-area">
+    <input type="file" id="imageInput" accept="image/*" multiple>
+  </div>
+
+  <p id="status" class="status"></p>
+  <div id="preview" class="preview"></div>
 
   <script>
-    const fileInput = document.getElementById("fileInput");
-    const progress = document.getElementById("progress");
-    const fileList = document.getElementById("fileList");
+    const input = document.getElementById('imageInput');
+    const status = document.getElementById('status');
+    const preview = document.getElementById('preview');
 
-    fileInput.addEventListener("change", async (event) => {
+    input.addEventListener('change', async (event) => {
       const files = event.target.files;
       if (!files.length) return;
 
-      fileList.innerHTML = "";
-      progress.textContent = "編集部：圧縮作業を開始しています…";
+      status.textContent = "圧縮作業を開始しています…";
+      preview.innerHTML = "";
 
       for (const file of files) {
         try {
-          // 元画像プレビュー
-          const originalUrl = URL.createObjectURL(file);
-
-          // 圧縮オプション
           const options = {
-            maxSizeMB: 0.5, // 500KBを目標
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
+            maxSizeMB: 0.5,
+            useWebWorker: true
           };
 
           const compressedFile = await imageCompression(file, options);
-          const compressedUrl = URL.createObjectURL(compressedFile);
+          const url = URL.createObjectURL(compressedFile);
 
-          // ファイル名生成
-          const fileNameParts = file.name.split(".");
-          const ext = fileNameParts.pop();
-          const baseName = fileNameParts.join(".");
-          const newFileName = `${baseName}_500kb.${ext}`;
+          // 圧縮率を計算
+          const ratio = ((compressedFile.size / file.size) * 100).toFixed(1);
 
-          // 圧縮率計算
-          const compressionRate = ((compressedFile.size / file.size) * 100).toFixed(1);
+          // ダウンロード処理
+          const newFileName = `${file.name.replace(/\.[^/.]+$/, "")}_500kb.${file.name.split('.').pop()}`;
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = newFileName;
+          link.click();
 
-          // 自動ダウンロード
-          const a = document.createElement("a");
-          a.href = compressedUrl;
-          a.download = newFileName;
-          a.click();
-
-          // 表示要素作成
-          const item = document.createElement("div");
-          item.className = "file-item";
+          // プレビュー表示
+          const item = document.createElement('div');
+          item.classList.add('preview-item');
           item.innerHTML = `
-            <div class="file-header">
-              <strong>${file.name}</strong>
-              <div class="sizes">
-                <span>元: ${(file.size / 1024).toFixed(1)} KB</span>　
-                <span>圧縮後: ${(compressedFile.size / 1024).toFixed(1)} KB</span>
-              </div>
-            </div>
-            <div class="file-body">
-              <div class="preview-group">
-                <img src="${originalUrl}" alt="original"><br>
-                <span>📸 元の画像</span>
-              </div>
-              <div class="preview-group">
-                <img src="${compressedUrl}" alt="compressed"><br>
-                <span>🗜️ 圧縮後</span><br>
-                <span class="compression-rate">圧縮率: ${compressionRate}%</span>
-              </div>
-            </div>
-            <div class="download-info">
-              「${newFileName}」として自動ダウンロードされました。
+            <img src="${url}" alt="compressed image">
+            <div class="file-info">
+              <div><span class="label">元サイズ:</span> ${(file.size / 1024).toFixed(1)} KB</div>
+              <div><span class="label">圧縮後:</span> ${(compressedFile.size / 1024).toFixed(1)} KB</div>
+              <div><span class="label">圧縮率:</span> ${ratio}%</div>
             </div>
           `;
-          fileList.appendChild(item);
-
-          // リソース開放
-          URL.revokeObjectURL(originalUrl);
-          URL.revokeObjectURL(compressedUrl);
+          preview.appendChild(item);
 
         } catch (error) {
           console.error(error);
-          const item = document.createElement("div");
-          item.className = "file-item";
-          item.textContent = `⚠️ ${file.name} の圧縮に失敗しました。`;
-          fileList.appendChild(item);
         }
       }
 
-      progress.textContent = "編集部：全画像の圧縮記事を掲載しました。";
+      status.textContent = "全ての圧縮画像を掲載しました。";
     });
   </script>
 </body>
