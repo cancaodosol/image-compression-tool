@@ -1,0 +1,83 @@
+
+body {
+    font-family: "Times New Roman", "游明朝", serif;
+    background-color: #f4f1ec;
+    padding: 30px;
+    color: #222;
+}
+
+h1 {
+    font-size: 2.0em;
+    border-bottom: 2px solid #000;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+.subheadline {
+    font-size: 1.0em;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.upload-area {
+    margin-bottom: 30px;
+}
+
+input[type="file"] {
+    font-size: 0.9em;
+    padding: 5px;
+}
+
+.status {
+    margin: 20px 0;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+.preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+}
+
+.preview-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: #fff;
+    max-width: 250px;
+    font-size: 0.8em;
+    text-align: center;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.preview-item img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+}
+
+.file-info {
+    margin-top: 5px;
+}
+
+.label {
+    font-weight: bold;
+}
+
+.download-btn {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 8px;
+    border: 1px solid #333;
+    background: #eee;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: background 0.2s;
+}
+
+.download-btn:hover {
+    background: #ddd;
+}
