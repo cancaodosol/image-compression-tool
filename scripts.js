@@ -53,16 +53,21 @@ input.addEventListener('change', async (event) => {
         }
     }
 
-    // 自動で順次ダウンロード（0.8秒間隔）
+    // 自動で順次ダウンロード（0.2秒間隔）
     let delay = 0;
     downloadQueue.forEach(({ url, name }) => {
         setTimeout(() => {
+            const iframe = document.createElement('iframe');
+            iframe.setAttribute('sandbox', 'allow-downloads');
+
             const link = document.createElement('a');
             link.href = url;
             link.download = name;
+            iframe.appendChild(link);
+
             link.click();
         }, delay);
-        delay += 800; // 800ms間隔
+        delay += 200; // 200ms間隔
     });
 
     statusText.textContent = "全ての圧縮が完了しました。";
