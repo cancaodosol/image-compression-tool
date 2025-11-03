@@ -1,4 +1,4 @@
-const version = 'v1.0.2';
+const version = 'v1.0.3';
 
 const h1 = document.querySelector('h1');
 const div = document.createElement('span');
